@@ -286,3 +286,98 @@ router.put("/Add_point", (req, res) => {
     })
 
 })
+
+router.get("/get_tag_by_ID", (req, res) => {
+    const { ID } = req.query;
+    db.serialize(() => {
+        db.all(`SELECT Tag.* From Tag WHERE ID in (SELECT Tag FROM Tag_point WHERE Point = ${ID}) `, (err, row) => {
+            if (err) {
+                res.status(500).send(err.message)
+            }
+            res.json(row)
+        })
+    })
+
+})
+
+router.get("/get_all_tag", (req, res) => {
+
+    db.serialize(() => {
+        db.all(`SELECT * From Tag `, (err, row) => {
+            if (err) {
+                res.status(500).send(err.message)
+            }
+            res.json(row)
+        })
+    })
+
+})
+
+const InsertTag = (ID, IDUser, item) => {
+
+    const Key = uuidv4()
+    const date = new Date().toLocaleDateString() + ", " + new Date().toLocaleTimeString()
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run(`INSERT INTO Tag_point (KEY,Tag,Point,User,Data_Add) VALUES (?,?,?,?,?)`, [Key, item, ID, IDUser, date], (err, row) => {
+                if (err) {
+                    console.log(err.message)
+                    reject(false)
+                }
+                resolve(true)
+            })
+        })
+    })
+
+}
+
+const InsertNewTag = (item) => {
+
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run(`INSERT INTO Tag (Tag_Name) VALUES (?)`, [item], function (err, row) {
+                if (err) {
+                    console.log(err.message)
+                    reject(false)
+                }
+                resolve(this.lastID)
+            })
+        })
+    })
+
+}
+
+router.put("/put_tag_by_ID", (req, res) => {
+    const { ID, IDUser, Tagname, typeTag } = req.body;
+
+    switch (typeTag) {
+        case "new":
+            const newdata = Tagname.split(",")
+            newdata.forEach(async (item) => {
+                await InsertNewTag(item).then(
+                    item => InsertTag(ID, IDUser, item).then().catch((value) => console.log(value))
+                )
+                // await InsertTag(ID, IDUser, item).then((value) => its++).catch((value) => console.log(value))
+            })
+            res.json({ status: true, mess: "Теги добавленны" })
+            break;
+
+        default:
+            const data = Tagname.split(",")
+            data.forEach(async (item) => {
+                await InsertTag(ID, IDUser, item).then((value) => its++).catch((value) => console.log(value))
+            })
+            res.json({ status: true, mess: "Теги добавленны" })
+            break;
+    }
+
+    // db.serialize(() => {
+    //     db.all(`SELECT Tag.* From Tag WHERE ID = (SELECT KEY FROM Tag_point WHERE Point = ${ID}) `, (err, row) => {
+    //         if (err) {
+    //             res.status(500).send(err.message)
+    //         }
+    //         res.json(row)
+    //     })
+    // })
+
+})

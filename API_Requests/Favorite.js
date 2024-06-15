@@ -55,6 +55,18 @@ router.get('/User_ID', (req, res) => {
 
 })
 
+router.get('/', (req, res) => {
+
+    db.serialize(() => {
+
+        db.all(`SELECT * FROM Favorites_Point`, (err, row) => {
+            res.json(row);
+        });
+
+    });
+
+})
+
 router.get("/get_favorite_by_User", (req, res) => {
 
     const { User_ID } = req.query;

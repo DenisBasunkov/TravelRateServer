@@ -37,7 +37,7 @@ const PORT = process.env.PORT;
 const server = Express();
 
 server.use(Express.json());
-server.use(Express.static(__dirname + "/public"));
+server.use(Express.static(__dirname + "/public/js"));
 server.use(fileUpload())
 
 server.use('/api/table', table);
@@ -60,13 +60,24 @@ server.get("/", (req, res) => {
     res.sendFile(path.join(__dirname + '/index.html'));
 })
 
-server.get("/about", (req, res) => {
-    res.sendFile(path.join(__dirname + '/About.html'));
-})
 
+import { exec } from "node:child_process"
+
+// exec('npm run dev', { cwd: __dirname + "/AdminPanel" }, (err, output) => {
+//     if (error) {
+//         console.error(`Error executing command: ${error.message}`);
+//         return;
+//     }
+//     if (stderr) {
+//         console.error(`Error output: ${stderr}`);
+//         return;
+//     }
+//     console.log(`Command output: ${stdout}`);
+// })
 
 server.listen(PORT, () => {
     console.log("http://" + ip.address() + ":" + process.env.PORT + "/\n💬\n" + process.pid);
+
 })
 
 //}

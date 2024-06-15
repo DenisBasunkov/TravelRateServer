@@ -31,7 +31,7 @@ router.get("/by_point_id", (req, res) => {
         FROM Reviews 
         LEFT JOIN User ON Reviews.User = User.User_KEY 
         WHERE Point = '${PointID}'`, (err, row) => {
-            console.log(row)
+            // console.log(row)
             res.json(row)
         })
     })
@@ -163,3 +163,22 @@ router.post("/", async (req, res) => {
 
 //     });
 // })
+
+router.get("/All_comment_foto_by_point", (req, res) => {
+    const { ID } = req.query
+    db.serialize(() => {
+        db.all(`SELECT Foto FROM Reviews WHERE Point = ${ID}`, (err, row) => {
+            const imgArr = new Array()
+            row.map(item => {
+                const data = JSON.parse(item.Foto)
+                if (Array.isArray(data)) {
+                    data.map(item => imgArr.push(item))
+
+                }
+            })
+            res.json(JSON.stringify(imgArr))
+
+        });
+
+    });
+})
