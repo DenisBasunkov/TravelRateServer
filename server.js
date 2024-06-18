@@ -7,7 +7,6 @@ import cors from "cors"
 import path, { dirname } from 'path';
 import ip from "ip";
 
-import table from './HL.js';
 import dotenv from "dotenv";
 
 
@@ -17,6 +16,8 @@ import Favorite from './API_Requests/Favorite.js';
 import Coments from './API_Requests/Coments.js';
 import ImageUpload from "./Images_upload.js"
 
+import adminPortfrom from "./Admin_search.js"
+
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,7 @@ import os from 'os';
 import cluster from "cluster";
 import { fileURLToPath } from "url";
 import { error } from "console";
+import * as admin from "./HL.js"
 
 //if (cluster.isMaster) {
 //    const numCPUs = os.cpus().length;
@@ -37,10 +39,11 @@ const PORT = process.env.PORT;
 const server = Express();
 
 server.use(Express.json());
-server.use(Express.static(__dirname + "/public/js"));
+server.use(Express.static(__dirname + "/public"));
 server.use(fileUpload())
 
-server.use('/api/table', table);
+server.use('/api/admin', adminPortfrom);
+
 server.use('/api/point_type', Point);
 server.use('/api/user', UserRoute);
 server.use('/api/favorite', Favorite);
@@ -55,6 +58,7 @@ server.get('/api/image/:imageName', (req, res) => {
     const { imageName } = req.params;
     res.sendFile(`${__dirname}/images/${imageName}`);
 });
+
 
 server.get("/", (req, res) => {
     res.sendFile(path.join(__dirname + '/index.html'));
